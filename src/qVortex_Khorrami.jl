@@ -40,11 +40,11 @@ function get_khorrami_arrays(r_vec, q, n, α)
     return W, dW, V_over_r, dV_plus_V_over_r, inv_r, inv_r2, Ω_b
 end
 
-function solve_khorrami_qvortex_inviscid(α, n, q; N=100, L=20.0, Re=10000.0)
+function solve_khorrami_qvortex_inviscid(α, n, q; N=100, L=1000, halfgridL=3)
     ξ, D_ξ = cheb_diff(N)
 
     # set up of r ξ transformation
-    a = 10
+    a = halfgridL # Half of the grid is within r<a
     b = 1+2a/L
 
     r = @.  a * (1 +ξ) ./(b -ξ)
@@ -145,28 +145,29 @@ function solve_khorrami_qvortex_inviscid(α, n, q; N=100, L=20.0, Re=10000.0)
     
     best_val = vals[sort_idx[1]]
     best_vec = vecs[:, sort_idx[1]]
+    scalefac = maximum(abs,best_vec[1:3N+3])
     
-    F_mode = best_vec[idx_F]
-    G_mode = best_vec[idx_G]
-    H_mode = best_vec[idx_H]
-    P_mode = best_vec[idx_P]
+    F_mode = best_vec[idx_F]./scalefac
+    G_mode = best_vec[idx_G]./scalefac
+    H_mode = best_vec[idx_H]./scalefac
+    P_mode = best_vec[idx_P]./scalefac
     
     return r, best_val, F_mode, G_mode, H_mode, P_mode, vals, vecs, sort_idx
 end
 
 # --- RUN AND PLOT ---
 # Parameters
-α_test = 0.5
-q_test = 0.8
-n_test = -1 # Try m=0, m=1, m=2!
+α_test = 0.6
+q_test = 0.2
+n_test = -1
 
-r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx = solve_khorrami_qvortex_inviscid(α_test, n_test, q_test, N=101, L=200, Re=100)
+r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx = solve_khorrami_qvortex_inviscid(α_test, n_test, q_test, N=401)
 # r_grid = real.(r_comp)
 
 println("Most Unstable Eigenvalue (σ) = ", best_val)
 
 # Plotting
-p1 = plot(r_grid, [abs.(F_mode) abs.(G_mode) abs.(H_mode)]./maximum(abs.(F_mode)), 
+p1 = plot(r_grid, [abs.(F_mode) abs.(G_mode) abs.(H_mode)], 
               labels=["|u_r|" "|u_θ|" "|u_z|"], 
               lw=2, 
               title="Full 3D Eigenfunction (m=$n_test)",
