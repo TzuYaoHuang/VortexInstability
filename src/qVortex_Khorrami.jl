@@ -1,4 +1,5 @@
-using LinearAlgebra, Plots
+using LinearAlgebra, Plots, DelimitedFiles
+cd(@__DIR__)
 
 function cheb_diff(N)
     x = cos.(pi * (0:N) / N)
@@ -40,7 +41,7 @@ function get_khorrami_arrays(r_vec, q, n, α)
     return W, dW, V_over_r, dV_plus_V_over_r, inv_r, inv_r2, Ω_b
 end
 
-function solve_khorrami_qvortex_inviscid(α, n, q; N=100, L=1000, halfgridL=3)
+function solve_khorrami_qvortex(α, n, q; N=100, L=1000, halfgridL=3, Re=Inf)
     ξ, D_ξ = cheb_diff(N)
 
     # set up of r ξ transformation
@@ -60,25 +61,26 @@ function solve_khorrami_qvortex_inviscid(α, n, q; N=100, L=1000, halfgridL=3)
     
     D2_r = D_r^2
     L_n = D2_r + diagm(inv_r) * D_r - diagm(n^2 .* inv_r2) - (α^2) * I_mat
+    neginvRe = -inv(Re)
     
     # --- RIGOROUSLY AUDITED 4x4 BLOCKS ---
     
     # 1. r-momentum (Eq 12 in typical texts)
-    A_FF = diagm(imΩ_b)
-    A_FG = diagm(-2V_over_r)
+    A_FF = diagm(imΩ_b) .+ neginvRe * (L_n .- diagm(inv_r2))
+    A_FG = diagm(-2V_over_r) .+ neginvRe*diagm(-2im*n*inv_r2)
     A_FH = Z
     A_FP = D_r
     
     # 2. θ-momentum (Eq 13 in typical texts)
-    A_GF = diagm(dV_plus_V_over_r)
-    A_GG = diagm(imΩ_b)
+    A_GF = diagm(dV_plus_V_over_r) .+ neginvRe*diagm(2im*n*inv_r2)
+    A_GG = diagm(imΩ_b) .+ neginvRe * (L_n .- diagm(inv_r2))
     A_GH = Z
     A_GP = diagm(im * n .* inv_r)
     
     # 3. z-momentum (Eq 14 in typical texts)
     A_HF = diagm(dW)
     A_HG = Z
-    A_HH = diagm(imΩ_b)
+    A_HH = diagm(imΩ_b) .+ neginvRe * L_n
     A_HP = α * imI 
     
     # 4. Continuity (Eq 15 in typical texts)
@@ -157,11 +159,13 @@ end
 
 # --- RUN AND PLOT ---
 # Parameters
-α_test = 0.6
-q_test = 0.2
-n_test = -1
+α_test = 1.34
+q_test = 0.48972347545692274
+n_test = -2
+Re_test = 141.4
+Ng = 401
 
-r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx = solve_khorrami_qvortex_inviscid(α_test, n_test, q_test, N=401)
+r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx = solve_khorrami_qvortex(α_test, n_test, q_test, N=Ng, Re=Re_test)
 # r_grid = real.(r_comp)
 
 println("Most Unstable Eigenvalue (σ) = ", best_val)
@@ -170,7 +174,7 @@ println("Most Unstable Eigenvalue (σ) = ", best_val)
 p1 = plot(r_grid, [abs.(F_mode) abs.(G_mode) abs.(H_mode)], 
               labels=["|u_r|" "|u_θ|" "|u_z|"], 
               lw=2, 
-              title="Full 3D Eigenfunction (m=$n_test)",
+              title="k=$α_test, q=$q_test, n=$n_test, Re=$Re_test, Ng=$Ng",
               xlabel="Radius (r)", 
               xlims=(0, 5))
 
@@ -180,3 +184,17 @@ p2 = scatter(real.(all_sigmas), imag.(all_sigmas),
              marker=:circle, label=false, markersize=3)
 
 plot(p1, p2, layout=(2,1), size=(800, 800))
+
+
+# TEST WITH KHORRAMI (Re=141.4, α=1.34, n=-2)
+qList = 0.2:0.1:1.2
+ciList = zero(qList)
+for (iq,q) ∈ enumerate(qList)
+    r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx = solve_khorrami_qvortex(1.34, -2, q, N=200, Re=141.4, L=100)
+    ciList[iq] = imag(best_val)
+end
+
+Khorrami_data = readdlm("../Dataset/Khorrami1989_JCP_viscousStability.csv", ',')
+
+p3 = plot(qList, -ciList, lw=2, label="Calculated")
+plot!(p3, Khorrami_data[:,1], Khorrami_data[:,2], lw=2, label="Khorrami 1989")
