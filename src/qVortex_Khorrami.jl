@@ -79,12 +79,12 @@ function solve_khorrami_qvortex_inviscid(α, n, q; N=100, L=20.0, Re=10000.0)
     A_HF = diagm(dW)
     A_HG = Z
     A_HH = diagm(imΩ_b)
-    A_HP = α * I_mat 
+    A_HP = α * imI 
     
     # 4. Continuity (Eq 15 in typical texts)
     A_CF = D_r + diagm(inv_r)
     A_CG = diagm(1im * n .* inv_r)
-    A_CH = 1im * α * I_mat
+    A_CH = α * imI
     A_CP = Z
 
     A = [A_FF A_FG A_FH A_FP;
@@ -122,12 +122,12 @@ function solve_khorrami_qvortex_inviscid(α, n, q; N=100, L=20.0, Re=10000.0)
         A[core_H, idx_H] = D_r[N+1, :] 
         A[core_P, idx_P] = D_r[N+1, :] 
     elseif abs(n) == 1
-        A[core_F, core_F] = 1.0; A[core_F, core_G] = +1im * n 
+        A[core_F, core_F] = 1.0; A[core_F, core_G] = 1im * n 
         A[core_H, core_H] = 1.0  
         A[core_P, core_P] = 1.0  
         
         A[core_G, idx_F] = 2.0 .* D_r[N+1, :]
-        A[core_G, idx_G] = -(1im * n) .* D_r[N+1, :]
+        A[core_G, idx_G] = (1im * n) .* D_r[N+1, :]
     else 
         A[core_F, core_F] = 1.0  
         A[core_G, core_G] = 1.0  
