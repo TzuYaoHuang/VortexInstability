@@ -179,7 +179,7 @@ p1 = plot(r_grid, [abs.(F_mode) abs.(G_mode) abs.(H_mode) real.(enconFreq)],
               title="k=$α_test, q=$q_test, n=$n_test, Re=$Re_test, Ng=$Ng",
               xlabel="Radius (r)", 
               xlims=(0, 5))
-hline!(p1,[0],ls=:dash,c=:gray)
+hline!(p1,[0],ls=:dash,c=:gray,label="")
 
 p2 = scatter(real.(all_sigmas), imag.(all_sigmas), 
              title="Eigenvalue Spectrum", 
