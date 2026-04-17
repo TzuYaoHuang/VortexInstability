@@ -154,30 +154,32 @@ function solve_khorrami_qvortex(α, n, q; N=100, L=1000, halfgridL=3, Re=Inf)
     G_mode = best_vec[idx_G]./scalefac
     H_mode = best_vec[idx_H]./scalefac
     P_mode = best_vec[idx_P]./scalefac
+
+    enconFreq = @. (n*V_over_r + α*W - best_val)
     
-    return r, best_val, F_mode, G_mode, H_mode, P_mode, vals, vecs, sort_idx
+    return r, best_val, F_mode, G_mode, H_mode, P_mode, vals, vecs, sort_idx, enconFreq
 end
 
 # --- RUN AND PLOT ---
 # Parameters
-α_test = -0.1
+α_test = 0.1
 q_test = 0.3
-n_test = 1
+n_test = -1
 Re_test = Inf
 Ng = 201
 
-r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx = solve_khorrami_qvortex(α_test, n_test, q_test, N=Ng, Re=Re_test)
-# r_grid = real.(r_comp)
+r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx, enconFreq = solve_khorrami_qvortex(α_test, n_test, q_test, N=Ng, Re=Re_test)
 
 println("Most Unstable Eigenvalue (σ) = ", best_val)
 
 # Plotting
-p1 = plot(r_grid, [abs.(F_mode) abs.(G_mode) abs.(H_mode)], 
-              labels=["|u_r|" "|u_θ|" "|u_z|"], 
+p1 = plot(r_grid, [abs.(F_mode) abs.(G_mode) abs.(H_mode) real.(enconFreq)], 
+              labels=["|u_r|" "|u_θ|" "|u_z|" "f_encount"], 
               lw=2, 
               title="k=$α_test, q=$q_test, n=$n_test, Re=$Re_test, Ng=$Ng",
               xlabel="Radius (r)", 
               xlims=(0, 5))
+hline!(p1,[0],ls=:dash,c=:gray)
 
 p2 = scatter(real.(all_sigmas), imag.(all_sigmas), 
              title="Eigenvalue Spectrum", 
@@ -191,7 +193,7 @@ plot(p1, p2, layout=(2,1), size=(800, 800))
 # qList = 0.2:0.1:1.2
 # ciList = zero(qList)
 # for (iq,q) ∈ enumerate(qList)
-#     r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx = solve_khorrami_qvortex(1.34, -2, q, N=200, Re=141.4, L=100)
+#     r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx, enconFreq = solve_khorrami_qvortex(1.34, -2, q, N=200, Re=141.4, L=100)
 #     ciList[iq] = imag(best_val)
 # end
 
