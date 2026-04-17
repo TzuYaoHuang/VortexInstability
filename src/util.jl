@@ -1,3 +1,5 @@
+using LinearAlgebra
+
 function cheb_diff(N)
     x = cos.(pi * (0:N) / N)
     c = [2; ones(N-1); 2] .* (-1).^(0:N)

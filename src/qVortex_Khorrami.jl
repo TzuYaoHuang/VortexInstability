@@ -1,11 +1,11 @@
-using LinearAlgebra, Plots, DelimitedFiles
+using Plots, DelimitedFiles
 cd(@__DIR__)
 
 include("util.jl")
 
 # --- RUN AND PLOT ---
 # Parameters
-α_test = 0.1
+α_test = 0.3
 q_test = 0.3
 n_test = -1
 Re_test = Inf
