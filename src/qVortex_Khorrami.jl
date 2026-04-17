@@ -64,7 +64,8 @@ function solve_khorrami_qvortex(α, n, q; N=100, L=1000, halfgridL=3, Re=Inf)
     neginvRe = -inv(Re)
     
     # --- RIGOROUSLY AUDITED 4x4 BLOCKS ---
-    
+    # (uᵣ,uₜ, uz, p) = (R(r), Θ(r), Z(r), P(r)) exp(i(kz+nθ-σt))
+
     # 1. r-momentum (Eq 12 in typical texts)
     A_FF = diagm(imΩ_b) .+ neginvRe * (L_n .- diagm(inv_r2))
     A_FG = diagm(-2V_over_r) .+ neginvRe*diagm(-2im*n*inv_r2)
@@ -94,10 +95,10 @@ function solve_khorrami_qvortex(α, n, q; N=100, L=1000, halfgridL=3, Re=Inf)
          A_HF A_HG A_HH A_HP;
          A_CF A_CG A_CH A_CP]
          
-    B = [-imI Z Z Z;
-         Z -imI Z Z;
-         Z Z -imI Z;
-         Z Z Z Z]
+    B = [imI Z   Z   Z;
+         Z   imI Z   Z;
+         Z   Z   imI Z;
+         Z   Z   Z   Z]
          
     # --- BOUNDARY CONDITIONS ---
     idx_F = 1:N+1;           idx_G = (N+2):(2N+2)
@@ -143,7 +144,7 @@ function solve_khorrami_qvortex(α, n, q; N=100, L=1000, halfgridL=3, Re=Inf)
     vals = vals[valid_idx]
     vecs = vecs[:, valid_idx]
     
-    sort_idx = sortperm(imag.(vals)) 
+    sort_idx = sortperm(imag.(vals),rev=true) 
     
     best_val = vals[sort_idx[1]]
     best_vec = vecs[:, sort_idx[1]]
@@ -159,11 +160,11 @@ end
 
 # --- RUN AND PLOT ---
 # Parameters
-α_test = 1.34
-q_test = 0.48972347545692274
-n_test = -2
-Re_test = 141.4
-Ng = 401
+α_test = -0.1
+q_test = 0.3
+n_test = 1
+Re_test = Inf
+Ng = 201
 
 r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx = solve_khorrami_qvortex(α_test, n_test, q_test, N=Ng, Re=Re_test)
 # r_grid = real.(r_comp)
@@ -187,14 +188,14 @@ plot(p1, p2, layout=(2,1), size=(800, 800))
 
 
 # TEST WITH KHORRAMI (Re=141.4, α=1.34, n=-2)
-qList = 0.2:0.1:1.2
-ciList = zero(qList)
-for (iq,q) ∈ enumerate(qList)
-    r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx = solve_khorrami_qvortex(1.34, -2, q, N=200, Re=141.4, L=100)
-    ciList[iq] = imag(best_val)
-end
+# qList = 0.2:0.1:1.2
+# ciList = zero(qList)
+# for (iq,q) ∈ enumerate(qList)
+#     r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx = solve_khorrami_qvortex(1.34, -2, q, N=200, Re=141.4, L=100)
+#     ciList[iq] = imag(best_val)
+# end
 
-Khorrami_data = readdlm("../Dataset/Khorrami1989_JCP_viscousStability.csv", ',')
+# Khorrami_data = readdlm("../Dataset/Khorrami1989_JCP_viscousStability.csv", ',')
 
-p3 = plot(qList, -ciList, lw=2, label="Calculated")
-plot!(p3, Khorrami_data[:,1], Khorrami_data[:,2], lw=2, label="Khorrami 1989")
+# p3 = plot(qList, ciList, lw=2, label="Calculated")
+# plot!(p3, Khorrami_data[:,1], Khorrami_data[:,2], lw=2, label="Khorrami 1989")
