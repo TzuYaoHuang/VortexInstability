@@ -17,7 +17,7 @@ println("Most Unstable Eigenvalue (σ) = ", best_val)
 
 # Plotting
 p1 = plot(r_grid, [abs.(F_mode) abs.(G_mode) abs.(H_mode) real.(enconFreq)], 
-              labels=["|u_r|" "|u_θ|" "|u_z|" "f_encount"], 
+              labels=["|R|" "|Θ|" "|Z|" "ωₑ"], 
               lw=2, 
               title="k=$α_test, q=$q_test, n=$n_test, Re=$Re_test, Ng=$Ng",
               xlabel="Radius (r)", 
@@ -25,11 +25,11 @@ p1 = plot(r_grid, [abs.(F_mode) abs.(G_mode) abs.(H_mode) real.(enconFreq)],
 hline!(p1,[0],ls=:dash,c=:gray,label="")
 
 p2 = scatter(real.(all_sigmas), imag.(all_sigmas), 
-             title="Eigenvalue Spectrum", 
+             title="σ ($best_val)", 
              xlabel="Re(σ)", ylabel="Im(σ)", 
              marker=:circle, label=false, markersize=3)
 
-plot(p1, p2, layout=(2,1), size=(800, 800))
+plot(p1, p2, layout=(2,1), size=(650, 800))
 
 
 # TEST WITH KHORRAMI (Re=141.4, α=1.34, n=-2)
