@@ -204,7 +204,7 @@ function build_inviscid_domain_blocks(r, D_r, q, α, n)
          Z   Z   imI Z;
          Z   Z   Z   Z]
 
-    return A, B, V, W
+    return A, B, V, W, ωₑ
 end
 
 # 3. Multiphase Solver with Domain Stitching
@@ -223,8 +223,8 @@ function solve_inviscid_multiphase_qvortex(α, n, q, rᵥ, rho1, rho2; N1=50, N2
     D_r₂ = D_ξ₂ ./ dr₂dξ₂
     
     # Build interior physics
-    A1, B1, V1_arr, W1_arr = build_inviscid_domain_blocks(r₁, D_r₁, q, α, n)
-    A2, B2, V2_arr, W2_arr = build_inviscid_domain_blocks(r₂, D_r₂, q, α, n)
+    A1, B1, V1_arr, W1_arr, ωₑ1_arr = build_inviscid_domain_blocks(r₁, D_r₁, q, α, n)
+    A2, B2, V2_arr, W2_arr, ωₑ2_arr = build_inviscid_domain_blocks(r₂, D_r₂, q, α, n)
     
     S1 = N1 + 1
     S2 = N2 + 1
@@ -341,6 +341,10 @@ function solve_inviscid_multiphase_qvortex(α, n, q, rᵥ, rho1, rho2; N1=50, N2
     G_mode ./= scalefac
     H_mode ./= scalefac
     P_mode ./= scalefac
+    
+    ζ₀F1 = F_mode[N1+1]/(im*(ωₑ1_arr[end]-best_val))
+    ζ₀F2 = F_mode[N1+2]/(im*(ωₑ2_arr[1]-best_val))
+    ζ₀ = (ζ₀F1+ζ₀F2)/2
 
-    return r_global, best_val, F_mode, G_mode, H_mode, P_mode, vals, vals, vecs, sort_idx
+    return r_global, best_val, F_mode, G_mode, H_mode, P_mode, ζ₀, vals, vals, vecs, sort_idx
 end
