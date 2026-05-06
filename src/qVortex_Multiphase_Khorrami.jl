@@ -5,17 +5,17 @@ include("util.jl")
 
 # --- RUN AND PLOT ---
 # Flow parameters
-q_test = 0.3
-rv_test = 1.2
-λρ =0.1
+q_test = 0.85
+rv_test = 1.12
+λρ = 2
 
 # Perturbation parameters
-α_test = 0.3
+α_test = 0.35
 n_test = -1
 
 # gridding
-N1g = 200
-N2g = 200
+N1g = 100
+N2g = 100
 
 
 r_grid, best_val, F_mode, G_mode, H_mode, P_mode, ζ₀, all_sigmas, all_vecs, sort_idx = solve_inviscid_multiphase_qvortex(α_test, n_test, q_test, rv_test, 1, λρ, N1=N1g, N2=N2g)
@@ -27,7 +27,7 @@ println("ζ₀ = ", ζ₀)
 p1 = plot(r_grid, [abs.(F_mode) abs.(G_mode) abs.(H_mode)], 
               labels=["|R|" "|Θ|" "|Z|" "ωₑ"], 
               lw=2, 
-              title="q=$q_test, rv=$rv_test, α=$α_test, n=$n_test, N1g=$N1g, N2g=$N2g",
+              title="q=$q_test, rv=$rv_test, λρ=$λρ, α=$α_test, n=$n_test, N1,2=$N1g,$N2g",
               xlabel="Radius (r)", 
               xlims=(0, 5))
 hline!(p1,[0],ls=:dash,c=:gray,label="")

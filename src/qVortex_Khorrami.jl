@@ -5,10 +5,14 @@ include("util.jl")
 
 # --- RUN AND PLOT ---
 # Parameters
-α_test = 0.3
-q_test = 0.3
-n_test = -1
+# Flow parameters
+q_test = 0.85
 Re_test = Inf
+
+# Perturbation parameters
+α_test = 0.35
+n_test = -1
+
 Ng = 201
 
 r_grid, best_val, F_mode, G_mode, H_mode, P_mode, all_sigmas, all_vecs, sort_idx, enconFreq = solve_khorrami_qvortex(α_test, n_test, q_test, N=Ng, Re=Re_test)
