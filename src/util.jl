@@ -346,5 +346,32 @@ function solve_inviscid_multiphase_qvortex(α, n, q, rᵥ, rho1, rho2; N1=50, N2
     ζ₀F2 = F_mode[N1+2]/(im*(ωₑ2_arr[1]-best_val))
     ζ₀ = (ζ₀F1+ζ₀F2)/2
 
-    return r_global, best_val, F_mode, G_mode, H_mode, P_mode, ζ₀, vals, vals, vecs, sort_idx
+    return r_global, best_val, F_mode, G_mode, H_mode, P_mode, ζ₀, vals, vecs, sort_idx
+end
+
+function getMultiphaseMode(best_vec, N1, N2)
+    S1 = N1 + 1
+    S2 = N2 + 1
+    offset = 4*S1
+    
+    # --- Mapping Key Row Indices ---
+    idx_F1 = 1:S1;             idx_G1 = S1+1:2S1
+    idx_H1 = 2S1+1:3S1;        idx_P1 = 3S1+1:4S1
+    
+    idx_F2 = offset+1:offset+S2;         idx_G2 = offset+S2+1:offset+2S2
+    idx_H2 = offset+2S2+1:offset+3S2;    idx_P2 = offset+3S2+1:offset+4S2
+
+    F_mode = vcat(best_vec[idx_F1], best_vec[idx_F2])
+    G_mode = vcat(best_vec[idx_G1], best_vec[idx_G2])
+    H_mode = vcat(best_vec[idx_H1], best_vec[idx_H2])
+    P_mode = vcat(best_vec[idx_P1], best_vec[idx_P2])
+
+    scalefac = max(maximum(abs, F_mode), maximum(abs, G_mode), maximum(abs, H_mode))
+    
+    F_mode ./= scalefac
+    G_mode ./= scalefac
+    H_mode ./= scalefac
+    P_mode ./= scalefac
+
+    return F_mode, G_mode, H_mode, P_mode
 end
