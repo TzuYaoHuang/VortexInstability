@@ -23,11 +23,11 @@ include("util.jl")
 # contourf!(qList, log₁₀ρ, σMat', xlimit=(-1.5,1.5), ylimit=(-1,1), aspect_ratio=:equal, color=:PuBuGn)
 # plot!(xlabel="q", ylabel="log10(ρout/ρin)", title="α=$α_test, n=$n_test, rv=$rv_test")
 
-q_test = 0
+q_test = 0.
 λρ_test = 1
 # log₁₀ρ = log10.(ρList)
-αList = 0.01:0.1:1.5
-nList = -6:6
+αList = 0:0.1:2
+nList = -1:1
 rv_test = 1.12 #1.12
 
 σMat = zeros((length(αList), length(nList)))
@@ -40,6 +40,6 @@ for ik∈eachindex(αList), im∈eachindex(nList)
 end
 
 plot(size=(700,500))
-contourf!(αList, nList, σMat', xlimit=(0,1.5), ylimit=(-6,6), color=:PuBuGn)
+contourf!(αList, nList, σMat', levels=5, xlimit=(0,2.0), ylimit=(-1,1), color=:PuBuGn)
 plot!(xlabel="α", ylabel="n", title="q=$q_test, λρ=$λρ_test, rv=$rv_test")
 
