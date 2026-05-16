@@ -5,13 +5,13 @@ include("util.jl")
 
 # --- RUN AND PLOT ---
 # Flow parameters
-q_test = 0.85
+q_test = 0.8
 rv_test = 1.12
-λρ = 2
+λρ = 0.1
 
 # Perturbation parameters
 α_test = 0.35
-n_test = -1
+n_test = -3
 
 # gridding
 N1g = 100
@@ -24,13 +24,14 @@ println("Most Unstable Eigenvalue (σ) = ", best_val)
 println("ζ₀ = ", ζ₀)
 
 # Plotting
-p1 = plot(r_grid, [abs.(F_mode) abs.(G_mode) abs.(H_mode)], 
-              labels=["|R|" "|Θ|" "|Z|" "ωₑ"], 
+p1 = plot(r_grid, [abs.(F_mode) abs.(G_mode) abs.(H_mode) 10abs.(P_mode)], 
+              labels=["|R|" "|Θ|" "|Z|" "10|Π|" "ωₑ"], 
               lw=2, 
               title="q=$q_test, rv=$rv_test, λρ=$λρ, α=$α_test, n=$n_test, N1,2=$N1g,$N2g",
               xlabel="Radius (r)", 
               xlims=(0, 5))
-hline!(p1,[0],ls=:dash,c=:gray,label="")
+vline!(p1,[rv_test],ls=:dash,c=:gray,label="")
+# hline!(p1,[0],ls=:dash,c=:gray,label="")
 
 p2 = scatter(real.(all_sigmas), imag.(all_sigmas), 
              title="σ ($best_val)", 
