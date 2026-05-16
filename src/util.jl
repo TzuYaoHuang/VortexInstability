@@ -324,29 +324,36 @@ function solve_inviscid_multiphase_qvortex(α, n, q, rᵥ, rho1, rho2; N1=50, N2
     vecs = vecs[:, valid_idx]
     
     sort_idx = sortperm(imag.(vals), rev=true) 
-    
-    best_val = vals[sort_idx[1]]
-    best_vec = vecs[:, sort_idx[1]]
-    
+
     # Stitch the full physical domain together (Duplicate point at rᵥ is retained)
     r_global = vcat(r₁, r₂)
-    F_mode = vcat(best_vec[idx_F1], best_vec[idx_F2])
-    G_mode = vcat(best_vec[idx_G1], best_vec[idx_G2])
-    H_mode = vcat(best_vec[idx_H1], best_vec[idx_H2])
-    P_mode = vcat(best_vec[idx_P1], best_vec[idx_P2])
 
-    scalefac = max(maximum(abs, F_mode), maximum(abs, G_mode), maximum(abs, H_mode))
+    # 1. PRE-DECLARE VARIABLES IN FUNCTION SCOPE
+    local best_val, best_vec, F_mode, G_mode, H_mode, P_mode
+
+    for _∈1:N1
+        best_val = vals[sort_idx[1]]
+        best_vec = vecs[:, sort_idx[1]]
+        F_mode, G_mode, H_mode, P_mode = getMultiphaseMode(best_vec, N1, N2)
+        scalefac = max(maximum(abs, F_mode), maximum(abs, G_mode), maximum(abs, H_mode))
     
-    F_mode ./= scalefac
-    G_mode ./= scalefac
-    H_mode ./= scalefac
-    P_mode ./= scalefac
+        F_mode ./= scalefac
+        G_mode ./= scalefac
+        H_mode ./= scalefac
+        P_mode ./= scalefac
+
+        diffG1 = (G_mode[2] - G_mode[1])/(r_global[2]-r_global[1])
+        if abs(diffG1) < 500
+            break
+        end
+        popfirst!(sort_idx)
+    end
     
     ζ₀F1 = F_mode[N1+1]/(im*(ωₑ1_arr[end]-best_val))
     ζ₀F2 = F_mode[N1+2]/(im*(ωₑ2_arr[1]-best_val))
     ζ₀ = (ζ₀F1+ζ₀F2)/2
 
-    return r_global, best_val, F_mode, G_mode, H_mode, P_mode, ζ₀, vals, vecs, sort_idx
+    return r_global, best_val, F_mode, G_mode, H_mode, P_mode, ζ₀, vals[sort_idx], vecs[:,sort_idx], sort_idx
 end
 
 function getMultiphaseMode(best_vec, N1, N2)
