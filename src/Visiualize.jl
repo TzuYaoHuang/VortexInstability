@@ -12,7 +12,7 @@ rv_test = 1.12
 
 # Perturbation parameters
 α_test = 0.35
-n_test = -1
+n_test = -2
 
 # gridding
 N1g = 30
@@ -33,10 +33,10 @@ const q = q_test       # Swirl strength
 const W = 1.0          # Axial velocity scale
 const α = α_test       # Axial wavenumber
 const n = n_test       # Azimuthal wavenumber
-const σ = best_val     # Complex frequency (σ_r + i*σ_i)
-const ε = 0.1          # Initial perturbation amplitude
+const σ = real(best_val)     # Complex frequency (σ_r + i*σ_i)
+const ε = 0.4          # Initial perturbation amplitude
 const R0 = rv_test     # Base interface radius
-const time_span = 35.0 # Total animation time
+const time_span = 50.0 # Total animation time
 
 # --- Physics Functions ---
 function base_flow(u, p, t)
@@ -61,7 +61,7 @@ ax = Axis3(fig[1, 1],
            title = "Batchelor Vortex: Growing Helical Instability (n=2 mode)",
            titlecolor = :white,
            aspect = :data, 
-           azimuth = 0.35π, elevation = 0.1π,
+           azimuth = 1.15π, elevation = 0.2π,
            perspectiveness = 0.5, 
            protrusions = 100)
 
@@ -86,7 +86,7 @@ t_obs = Observable(0.0)
 
 # Grid for the interface
 θ_grid = range(0, 2π, length=80)
-z_grid = range(0, 6π/α, length=80)
+z_grid = range(0, 2π/α, length=80)
 
 # Compute coordinates and the perturbation magnitude simultaneously
 surface_data = lift(t_obs) do t
@@ -119,7 +119,7 @@ ys = @lift($surface_data[2])
 zs = @lift($surface_data[3])
 cols = @lift($surface_data[4])
 
-cmap = :ice
+cmap = :viridis
 
 Colorbar(fig[1, 2], label="Perturbation Peak/Trough", labelcolor=:white, 
          ticklabelcolor=:white, colormap=cmap, colorrange=(-1, 1))
@@ -127,7 +127,7 @@ Colorbar(fig[1, 2], label="Perturbation Peak/Trough", labelcolor=:white,
 surface!(ax, xs, ys, zs, 
          color = cols, 
          colorrange = (-1, 1), 
-         colormap = cmap, 
+         colormap = cmap,
          alpha = 0.9, 
          transparency = true, 
          
@@ -160,12 +160,17 @@ time_text = lift(t_obs) do t
 end
 text!(ax, 1.5, 1.5, 6π/α + 0.2; text=time_text, color=:white, align=(:center, :bottom), fontsize=24)
 
-display(fig)
-
-# Play the animation interactively in the GLMakie window
+# --- Animation and Saving Loop ---
 framerate = 30
 timestamps = range(0, time_span, step=0.1)
-for t in timestamps
+
+println("Rendering and saving video...")
+
+# This block generates and saves the MP4 file
+record(fig, "vortex_instability.mp4", timestamps; framerate = framerate) do t
     t_obs[] = t
-    sleep(1/framerate)
 end
+
+println("Video saved successfully as 'vortex_instability.mp4'.")
+
+display(fig)
