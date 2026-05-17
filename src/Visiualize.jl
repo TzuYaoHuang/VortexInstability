@@ -8,11 +8,11 @@ include("util.jl")
 # Flow parameters
 q_test = 0.1
 rv_test = 1.12
-λρ = 2
+λρ = 1
 
 # Perturbation parameters
 α_test = 0.35
-n_test = -2
+n_test = -3
 
 # gridding
 N1g = 30
@@ -33,7 +33,7 @@ const q = q_test       # Swirl strength
 const W = 1.0          # Axial velocity scale
 const α = α_test       # Axial wavenumber
 const n = n_test       # Azimuthal wavenumber
-const σ = real(best_val)     # Complex frequency (σ_r + i*σ_i)
+const σ = real(best_val)+0.3im*imag(best_val)     # Complex frequency (σ_r + i*σ_i)
 const ε = 0.4          # Initial perturbation amplitude
 const R0 = rv_test     # Base interface radius
 const time_span = 50.0 # Total animation time
@@ -54,7 +54,7 @@ function base_flow(u, p, t)
 end
 
 # --- Visualization Setup ---
-fig = Figure(size = (1200, 1000), backgroundcolor = :gray50)
+fig = Figure(size = (600, 1000), backgroundcolor = :white)
 
 # Initialize Axis3 without the invalid 'scenekw' argument
 ax = Axis3(fig[1, 1], 
@@ -71,15 +71,17 @@ set_ambient_light!(ax.scene, RGBf(0.3, 0.3, 0.3))
 set_lights!(ax.scene, [DirectionalLight(RGBf(1, 1, 1), Vec3f(1, 1, -1))])
 
 # Style axes for dark background
-ax.xgridcolor = :gray30
-ax.ygridcolor = :gray30
-ax.zgridcolor = :gray30
-ax.xticklabelcolor = :white
-ax.yticklabelcolor = :white
-ax.zticklabelcolor = :white
-ax.xlabelcolor = :white
-ax.ylabelcolor = :white
-ax.zlabelcolor = :white
+# ax.xgridcolor = :gray30
+# ax.ygridcolor = :gray30
+# ax.zgridcolor = :gray30
+# ax.xticklabelcolor = :white
+# ax.yticklabelcolor = :white
+# ax.zticklabelcolor = :white
+# ax.xlabelcolor = :white
+# ax.ylabelcolor = :white
+# ax.zlabelcolor = :white
+hidedecorations!(ax)
+hidespines!(ax)
 
 # Time as an observable for animation
 t_obs = Observable(0.0)
@@ -119,10 +121,10 @@ ys = @lift($surface_data[2])
 zs = @lift($surface_data[3])
 cols = @lift($surface_data[4])
 
-cmap = :viridis
+cmap = :PRGn
 
-Colorbar(fig[1, 2], label="Perturbation Peak/Trough", labelcolor=:white, 
-         ticklabelcolor=:white, colormap=cmap, colorrange=(-1, 1))
+# Colorbar(fig[1, 2], label="Perturbation Peak/Trough", labelcolor=:white, 
+#          ticklabelcolor=:white, colormap=cmap, colorrange=(-1, 1))
 
 surface!(ax, xs, ys, zs, 
          color = cols, 
@@ -132,7 +134,7 @@ surface!(ax, xs, ys, zs,
          transparency = true, 
          
          # Use FastShading or MultiLightShading for modern Makie
-         shading = FastShading, 
+         shading = true, 
          
          # Material properties (valid for surface!)
          diffuse = Vec3f(1.0, 1.0, 1.0), 
@@ -150,10 +152,10 @@ for s in seeds
     prob = ODEProblem(base_flow, s, tspan_trace)
     sol = solve(prob, Tsit5(), reltol=1e-7) 
     ptrace = stack(sol.u)'
-    lines!(ax, ptrace[:, 1], ptrace[:, 2], ptrace[:, 3], color = :orange, linewidth = 1.0, alpha=0.6)
+    lines!(ax, ptrace[:, 1], ptrace[:, 2], ptrace[:, 3], color = :darkorange2, linewidth = 1.75, alpha=1)
 end
 
-xlims!(ax, -3,3); ylims!(ax, -3,3); zlims!(ax, 0, 2π/α)
+xlims!(ax, -2,2); ylims!(ax, -2,2); zlims!(ax, 0, 2π/α)
 
 time_text = lift(t_obs) do t
     "Time: $(round(t, digits=1))"
