@@ -45,7 +45,7 @@ include("util.jl")
 
 
 qList = -1.5:0.05:0
-λρ_test = .1
+λρ_test = .01
 # log₁₀ρ = log10.(ρList)
 αList = 0:0.05:2
 n_test = 1
@@ -62,7 +62,9 @@ for ik∈eachindex(αList), iq∈eachindex(qList)
     σrMat[iq, ik] = real(best_val)
 end
 
-plot(size=(700,500))
-heatmap!(qList, αList, σiMat', levels=0:0.01:0.24, xlimit=(-1.5,0), ylimit=(0,2), color=:PuBuGn)
-plot!(xlabel="q", ylabel="α", title="n=$n_test, λρ=$λρ_test, rv=$rv_test")
+# Plotting
+p1 = heatmap(qList, αList, σiMat', xlimit=(-1.5,0), ylimit=(0,2), color=:tempo, ylabel="α", colorbar_title="σi", clim=(0,0.6)) #linear_worb_100_25_c53_n256
 
+p2 = heatmap(qList, αList, σrMat', xlimit=(-1.5,0), ylimit=(0,2), color=:PRGn_5, xlabel="q", ylabel="α", colorbar_title="σr",clim=(-π/2,π/2))
+
+plot(p1, p2, layout=(2,1), size=(650, 900), title="n=$n_test, λρ=$λρ_test, rv=$rv_test")
