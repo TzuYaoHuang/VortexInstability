@@ -25,7 +25,7 @@ include("util.jl")
 
 # q_test = 0.
 # λρ_test = 1
-# # log₁₀ρ = log10.(ρList)
+#log₁₀ρ = log10.(ρList)
 # αList = 0:0.1:2
 # nList = -1:1
 # rv_test = 1.12 #1.12
@@ -44,27 +44,50 @@ include("util.jl")
 # plot!(xlabel="α", ylabel="n", title="q=$q_test, λρ=$λρ_test, rv=$rv_test")
 
 
-qList = -1.5:0.05:0
-λρ_test = .01
-# log₁₀ρ = log10.(ρList)
-αList = 0:0.05:2
-n_test = 1
+# qList = -1.5:0.05:0
+# λρ_test = .01
+# αList = 0:0.05:2
+# n_test = 1
+# rv_test = 1.12 #1.12
+
+# σiMat = zeros((length(qList), length(αList)))
+# σrMat = zeros((length(qList), length(αList)))
+
+# for ik∈eachindex(αList), iq∈eachindex(qList)
+#     α_test = αList[ik]
+#     q_test = qList[iq]
+#     r_grid, best_val, F_mode, G_mode, H_mode, P_mode, ζ₀, all_sigmas, all_vecs, sort_idx = solve_inviscid_multiphase_qvortex(α_test, n_test, q_test, rv_test, 1, λρ_test, N1=50, N2=50)
+#     σiMat[iq, ik] = imag(best_val)
+#     σrMat[iq, ik] = real(best_val)
+# end
+
+# # Plotting
+# p1 = heatmap(qList, αList, σiMat', xlimit=(-1.5,0), ylimit=(0,2), color=:tempo, ylabel="α", colorbar_title="σi", clim=(0,0.6)) #linear_worb_100_25_c53_n256
+
+# p2 = heatmap(qList, αList, σrMat', xlimit=(-1.5,0), ylimit=(0,2), color=:PRGn_5, xlabel="q", ylabel="α", colorbar_title="σr",clim=(-π/2,π/2))
+
+# plot(p1, p2, layout=(2,1), size=(650, 900), title="n=$n_test, λρ=$λρ_test, rv=$rv_test")
+
+qList = 0:0.05:1.5
+λρ_test = 0.1
+α_test = 0.35
+nList = -3:3
 rv_test = 1.12 #1.12
 
-σiMat = zeros((length(qList), length(αList)))
-σrMat = zeros((length(qList), length(αList)))
+σiMat = zeros((length(qList), length(nList)))
+σrMat = zeros((length(qList), length(nList)))
 
-for ik∈eachindex(αList), iq∈eachindex(qList)
-    α_test = αList[ik]
+for im∈eachindex(nList), iq∈eachindex(qList)
+    n_test = nList[im]
     q_test = qList[iq]
     r_grid, best_val, F_mode, G_mode, H_mode, P_mode, ζ₀, all_sigmas, all_vecs, sort_idx = solve_inviscid_multiphase_qvortex(α_test, n_test, q_test, rv_test, 1, λρ_test, N1=50, N2=50)
-    σiMat[iq, ik] = imag(best_val)
-    σrMat[iq, ik] = real(best_val)
+    σiMat[iq, im] = imag(best_val)
+    σrMat[iq, im] = real(best_val)
 end
 
 # Plotting
-p1 = heatmap(qList, αList, σiMat', xlimit=(-1.5,0), ylimit=(0,2), color=:tempo, ylabel="α", colorbar_title="σi", clim=(0,0.6)) #linear_worb_100_25_c53_n256
+p1 = heatmap(qList, nList, σiMat', xlimit=(0,1.5), ylimit=(-3,3), color=:tempo, ylabel="n", colorbar_title="Growth rate", clim=(0,0.6)) #linear_worb_100_25_c53_n256
 
-p2 = heatmap(qList, αList, σrMat', xlimit=(-1.5,0), ylimit=(0,2), color=:PRGn_5, xlabel="q", ylabel="α", colorbar_title="σr",clim=(-π/2,π/2))
+p2 = heatmap(qList, nList, σrMat', xlimit=(0,1.5), ylimit=(-3,3), color=:PRGn_5, xlabel="q", ylabel="n", colorbar_title="Phase speed",clim=(-π/2,π/2))
 
-plot(p1, p2, layout=(2,1), size=(650, 900), title="n=$n_test, λρ=$λρ_test, rv=$rv_test")
+plot(p1, p2, layout=(2,1), size=(650, 900), title="Density ratio (out/in) = $(λρ_test)")
