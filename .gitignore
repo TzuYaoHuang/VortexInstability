@@ -1,3 +1,5 @@
 Manifest.toml
 .vscode
 *mp4
+gr-temp/
+*png
