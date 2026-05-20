@@ -8,15 +8,15 @@ include("util.jl")
 # Flow parameters
 q_test = 0.1
 rv_test = 1.12
-λρ = 1
+λρ = 0.01
 
 # Perturbation parameters
-α_test = 0.35
-n_test = -3
+α_test = 0.3503
+n_test = -1
 
 # gridding
-N1g = 30
-N2g = 30
+N1g = 100
+N2g = 100
 
 
 r_grid, best_val, F_mode, G_mode, H_mode, P_mode, ζ₀, all_sigmas, all_vecs, sort_idx = solve_inviscid_multiphase_qvortex(α_test, n_test, q_test, rv_test, 1, λρ, N1=N1g, N2=N2g)
@@ -33,10 +33,10 @@ const q = q_test       # Swirl strength
 const W = 1.0          # Axial velocity scale
 const α = α_test       # Axial wavenumber
 const n = n_test       # Azimuthal wavenumber
-const σ = real(best_val)+0.3im*imag(best_val)     # Complex frequency (σ_r + i*σ_i)
-const ε = 0.4          # Initial perturbation amplitude
+const σ = real(best_val)+im*imag(best_val)     # Complex frequency (σ_r + i*σ_i)
+const ε = 0.01          # Initial perturbation amplitude
 const R0 = rv_test     # Base interface radius
-const time_span = 50.0 # Total animation time
+const time_span = 120.0 # Total animation time
 
 # --- Physics Functions ---
 function base_flow(u, p, t)
@@ -54,7 +54,7 @@ function base_flow(u, p, t)
 end
 
 # --- Visualization Setup ---
-fig = Figure(size = (600, 1000), backgroundcolor = :white)
+fig = Figure(size = (500, 1000), backgroundcolor = :white)
 
 # Initialize Axis3 without the invalid 'scenekw' argument
 ax = Axis3(fig[1, 1], 
@@ -97,7 +97,7 @@ surface_data = lift(t_obs) do t
     Z = zeros(length(θ_grid), length(z_grid))
     Perturbation_Color = zeros(length(θ_grid), length(z_grid))
     
-    growth = exp(imag(σ)*t)
+    growth = clamp(exp(imag(σ)*t),0,1.0/ε)
     freq_shift = real(σ)*t
     
     for (i, θ) in enumerate(θ_grid)
@@ -143,9 +143,9 @@ surface!(ax, xs, ys, zs,
 
 # --- Particle Tracing (Base Flow) ---
 n_particles = 8
-seeds_inner = [ [0.5R0*cos(θ), 0.5R0*sin(θ), 0.0] for θ in range(0, 2π, length=n_particles) ]
+# seeds_inner = [ [0.5R0*cos(θ), 0.5R0*sin(θ), 0.0] for θ in range(0, 2π, length=n_particles) ]
 seeds_outer = [ [1.5R0*cos(θ), 1.5R0*sin(θ), 0.0] for θ in range(0, 2π, length=n_particles) ]
-seeds = vcat(seeds_inner, seeds_outer)
+seeds = seeds_outer # vcat(seeds_inner, seeds_outer)
 tspan_trace = (0.0, 30*2π/α)
 
 for s in seeds
@@ -163,13 +163,13 @@ end
 text!(ax, 1.5, 1.5, 6π/α + 0.2; text=time_text, color=:white, align=(:center, :bottom), fontsize=24)
 
 # --- Animation and Saving Loop ---
-framerate = 30
-timestamps = range(0, time_span, step=0.1)
+framerate = 15
+timestamps = range(0, time_span, step=0.5)
 
 println("Rendering and saving video...")
 
 # This block generates and saves the MP4 file
-record(fig, "vortex_instability.mp4", timestamps; framerate = framerate) do t
+record(fig, "vortex_instability_q$(q_test)_n$(n_test).mp4", timestamps; framerate = framerate) do t
     t_obs[] = t
 end
 
