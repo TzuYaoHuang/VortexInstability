@@ -6,13 +6,13 @@ include("util.jl")
 
 # --- RUN AND PLOT ---
 # Flow parameters
-q_test = 0.1
+q_test = -0.1
 rv_test = 1.12
 λρ = 0.01
 
 # Perturbation parameters
 α_test = 0.3503
-n_test = -1
+n_test = 1
 
 # gridding
 N1g = 100
@@ -169,7 +169,7 @@ timestamps = range(0, time_span, step=0.5)
 println("Rendering and saving video...")
 
 # This block generates and saves the MP4 file
-record(fig, "vortex_instability_q$(q_test)_n$(n_test).mp4", timestamps; framerate = framerate) do t
+record(fig, "vortex_instability_q$(q_test)_n$(n_test)_rho$(λρ).mp4", timestamps; framerate = framerate) do t
     t_obs[] = t
 end
 
