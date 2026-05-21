@@ -353,7 +353,7 @@ function solve_inviscid_multiphase_qvortex(α, n, q, rᵥ, rho1, rho2; N1=50, N2
     ζ₀F2 = F_mode[N1+2]/(im*(ωₑ2_arr[1]-best_val))
     ζ₀ = (ζ₀F1+ζ₀F2)/2
 
-    return r_global, best_val, F_mode, G_mode, H_mode, P_mode, ζ₀, vals[sort_idx], vecs[:,sort_idx], sort_idx
+    return r_global, best_val, F_mode, G_mode, H_mode, P_mode, ζ₀, vals[sort_idx], vecs[:,sort_idx], sort_idx, D_r₁, D_r₂
 end
 
 function getMultiphaseMode(best_vec, N1, N2)
