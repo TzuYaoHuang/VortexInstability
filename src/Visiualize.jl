@@ -141,19 +141,19 @@ surface!(ax, xs, ys, zs,
          specular = Vec3f(1.5, 1.5, 1.5), 
          shininess = 64.0f0)
 
-# --- Particle Tracing (Base Flow) ---
-n_particles = 8
-# seeds_inner = [ [0.5R0*cos(θ), 0.5R0*sin(θ), 0.0] for θ in range(0, 2π, length=n_particles) ]
-seeds_outer = [ [1.5R0*cos(θ), 1.5R0*sin(θ), 0.0] for θ in range(0, 2π, length=n_particles) ]
-seeds = seeds_outer # vcat(seeds_inner, seeds_outer)
-tspan_trace = (0.0, 30*2π/α)
+# # --- Particle Tracing (Base Flow) ---
+# n_particles = 8
+# # seeds_inner = [ [0.5R0*cos(θ), 0.5R0*sin(θ), 0.0] for θ in range(0, 2π, length=n_particles) ]
+# seeds_outer = [ [1.5R0*cos(θ), 1.5R0*sin(θ), 0.0] for θ in range(0, 2π, length=n_particles) ]
+# seeds = seeds_outer # vcat(seeds_inner, seeds_outer)
+# tspan_trace = (0.0, 30*2π/α)
 
-for s in seeds
-    prob = ODEProblem(base_flow, s, tspan_trace)
-    sol = solve(prob, Tsit5(), reltol=1e-7) 
-    ptrace = stack(sol.u)'
-    lines!(ax, ptrace[:, 1], ptrace[:, 2], ptrace[:, 3], color = :darkorange2, linewidth = 1.75, alpha=1)
-end
+# for s in seeds
+#     prob = ODEProblem(base_flow, s, tspan_trace)
+#     sol = solve(prob, Tsit5(), reltol=1e-7) 
+#     ptrace = stack(sol.u)'
+#     lines!(ax, ptrace[:, 1], ptrace[:, 2], ptrace[:, 3], color = :darkorange2, linewidth = 1.75, alpha=1)
+# end
 
 xlims!(ax, -2,2); ylims!(ax, -2,2); zlims!(ax, 0, 2π/α)
 
